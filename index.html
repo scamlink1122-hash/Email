@@ -16,11 +16,13 @@
 }
 html,body{height:100%;margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg-gradient);-webkit-font-smoothing:antialiased;}
 
+/* Admin panel */
 #adminPanel{
-  position:fixed;bottom:10px;right:10px;z-index:9999;
-  background:#ffffffdd;padding:12px;border-radius:10px;
+  position:fixed;top:10px;left:10px;z-index:9999;
+  display:flex;gap:8px;
 }
-#adminPanel button{padding:8px 16px;border:0;border-radius:6px;color:#fff;cursor:pointer;margin-right:6px;}
+#adminPanel button{padding:8px 16px;border:0;border-radius:6px;color:#fff;cursor:pointer;font-weight:600;}
+
 #app{display:none;position:relative;width:100%;height:100vh;display:flex;flex-direction:column;gap:6px;box-sizing:border-box;padding:8px;}
 
 /* APP STYLES */
@@ -49,12 +51,10 @@ video{display:block;object-fit:cover;width:100%;height:100%;}
 </head>
 <body>
 
-<!-- ADMIN PANEL -->
-<div id="adminPanel">
-  <h3 style="margin:0 0 8px">Admin Control</h3>
+<!-- Admin Panel (only for admin device) -->
+<div id="adminPanel" style="display:none">
   <button id="appOn" style="background:#28a745">ON</button>
   <button id="appOff" style="background:#dc3545">OFF</button>
-  <p id="appStatusTxt"></p>
 </div>
 
 <!-- APP -->
@@ -100,21 +100,24 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// ----- ADMIN PANEL -----
-const adminPanel = document.getElementById("adminPanel");
+// ----- Admin detection -----
+// Example: only admin device with localStorage flag sees panel
+const isAdmin = localStorage.getItem('isAdminDevice'); // set this manually once on your admin browser
+if(isAdmin){ document.getElementById('adminPanel').style.display='flex'; }
+
+// ----- Admin panel buttons -----
 const appOn = document.getElementById("appOn");
 const appOff = document.getElementById("appOff");
-const appStatusTxt = document.getElementById("appStatusTxt");
 const accessRef = db.ref("control/appStatus");
 
-appOn.onclick = ()=>{accessRef.set("on"); appStatusTxt.innerText="Status: ON";}
-appOff.onclick = ()=>{accessRef.set("off"); appStatusTxt.innerText="Status: OFF";}
+appOn.onclick = ()=>{accessRef.set("on");};
+appOff.onclick = ()=>{accessRef.set("off");};
 
-// ----- CHECK APP STATUS -----
+// ----- Check app status -----
 const appDiv = document.getElementById("app");
 accessRef.on("value", snap=>{
   const status = snap.val();
-  if(status==="on"){ appDiv.style.display="flex"; initApp();}
+  if(status==="on"){ appDiv.style.display="flex"; initApp(); }
   else{ appDiv.style.display="none"; }
 });
 
