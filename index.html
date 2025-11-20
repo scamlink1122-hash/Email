@@ -8,7 +8,6 @@
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
 <style>
 :root{
@@ -17,22 +16,11 @@
 }
 html,body{height:100%;margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg-gradient);-webkit-font-smoothing:antialiased;}
 
-/* AUTH SCREEN */
-#authScreen{
-  position:fixed;inset:0;background:rgba(0,0,0,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;color:white;
-}
-#authScreen input{width:220px;padding:12px;margin:6px;border-radius:8px;border:none;outline:none;font-size:16px;}
-#authScreen input[readonly]{background:#555;color:#fff;text-align:center;}
-#authScreen button{margin-top:12px;padding:10px 18px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-weight:600;cursor:pointer;}
-#authScreen p{margin-top:8px;font-size:14px;cursor:pointer;}
-#authError{color:#ff8888; margin-top:6px; font-size:14px;}
-
-/* ADMIN PANEL */
 #adminPanel{
-  position:fixed;bottom:10px;right:10px;z-index:99999;
-  background:#ffffffdd;padding:12px;border-radius:10px;display:none
+  position:fixed;bottom:10px;right:10px;z-index:9999;
+  background:#ffffffdd;padding:12px;border-radius:10px;
 }
-#adminPanel button{padding:8px 16px;border:0;border-radius:6px;color:#fff;cursor:pointer;}
+#adminPanel button{padding:8px 16px;border:0;border-radius:6px;color:#fff;cursor:pointer;margin-right:6px;}
 #app{display:none;position:relative;width:100%;height:100vh;display:flex;flex-direction:column;gap:6px;box-sizing:border-box;padding:8px;}
 
 /* APP STYLES */
@@ -60,15 +48,6 @@ video{display:block;object-fit:cover;width:100%;height:100%;}
 </style>
 </head>
 <body>
-
-<!-- AUTH SCREEN -->
-<div id="authScreen">
-  <h2 id="authTitle">User Login</h2>
-  <input id="authEmail" type="email" readonly>
-  <input id="authPass" type="password" placeholder="Enter Password">
-  <button id="authBtn">Login</button>
-  <p id="authError"></p>
-</div>
 
 <!-- ADMIN PANEL -->
 <div id="adminPanel">
@@ -120,65 +99,24 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-const auth = firebase.auth();
 
-// ----- CONFIG -----
-const adminEmail = "rohitjadhav8425@gmail.com";
-const userEmail = "scamlink1122@gmail.com";
-const maskedAdmin = "xxxxxx@xxx.com";
-const maskedUser = "xxxxxx@xxx.com";
-
-// ----- AUTH ELEMENTS -----
-const authScreen = document.getElementById("authScreen");
-const authEmailInput = document.getElementById("authEmail");
-const authPass = document.getElementById("authPass");
-const authBtn = document.getElementById("authBtn");
-const authError = document.getElementById("authError");
+// ----- ADMIN PANEL -----
 const adminPanel = document.getElementById("adminPanel");
 const appOn = document.getElementById("appOn");
 const appOff = document.getElementById("appOff");
 const appStatusTxt = document.getElementById("appStatusTxt");
-
-let isAdmin = location.search.includes("admin=1");
-
-// ----- PRE-FILL EMAIL -----
-authEmailInput.value = isAdmin ? maskedAdmin : maskedUser;
-
-// ----- ADMIN PANEL -----
-if(isAdmin) adminPanel.style.display="block";
-
 const accessRef = db.ref("control/appStatus");
+
 appOn.onclick = ()=>{accessRef.set("on"); appStatusTxt.innerText="Status: ON";}
 appOff.onclick = ()=>{accessRef.set("off"); appStatusTxt.innerText="Status: OFF";}
 
-// ----- LOGIN -----
-authBtn.addEventListener("click",()=>{
-  const pass = authPass.value.trim();
-  if(isAdmin){
-    // ADMIN LOGIN: check password only
-    const correctAdminPass = "790933"; // aap change kar sakte ho
-    if(pass === correctAdminPass){
-      authScreen.style.display="none";
-      checkAppStatus();
-    }else authError.textContent="Wrong Password";
-  }else{
-    // USER LOGIN: password only
-    const correctUserPass = "957566"; // aap change kar sakte ho
-    if(pass===correctUserPass){
-      authScreen.style.display="none";
-      checkAppStatus();
-    }else authError.textContent="Wrong Password";
-  }
-});
-
 // ----- CHECK APP STATUS -----
-function checkAppStatus(){
-  accessRef.on("value",snap=>{
-    const status = snap.val();
-    if(status==="on"){ document.getElementById("app").style.display="flex"; initApp();}
-    else{ document.getElementById("app").style.display="none"; alert("Website is OFF by admin.");}
-  });
-}
+const appDiv = document.getElementById("app");
+accessRef.on("value", snap=>{
+  const status = snap.val();
+  if(status==="on"){ appDiv.style.display="flex"; initApp();}
+  else{ appDiv.style.display="none"; }
+});
 
 // ---------------- VIDEO + CHAT ELEMENTS ----------------
 const remoteVideo = document.getElementById('remoteVideo');
@@ -286,4 +224,4 @@ document.getElementById('copyBtn').addEventListener('click',()=>{
 });
 </script>
 </body>
-  </html>
+</html>
